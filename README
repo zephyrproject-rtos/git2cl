@@ -4,7 +4,7 @@ git2cl
 This is a quick'n'dirty tool to convert git logs to GNU ChangeLog
 format.
 
-The tool expects output from 'git --pretty --numstat --summary' on
+The tool expects output from 'git log --pretty --numstat --summary' on
 stdin.  Thus, typically you would use it as follows:
 
 ...........................................................................
