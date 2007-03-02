@@ -257,7 +257,9 @@ while (<>) {
 	$done = 1 if (m,^$,);
     }
 
-    if ($done) {
+    if ($done && @date == ()) {
+	print STDERR "warning: could not parse entry\n";
+    } elsif ($done) {
 	print (strftime "%Y-%m-%d  $author\n\n", @date);
 
 	my $files = join (", ", @files);
