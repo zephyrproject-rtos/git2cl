@@ -1,0 +1,37 @@
+git2cl
+======
+
+This is a quick'n'dirty tool to convert git logs to GNU ChangeLog
+format.
+
+The tool expects output from 'git --pretty --numstat --summary' on
+stdin.  Thus, typically you would use it as follows:
+
+...........................................................................
+jas@mocca:~/src/libtasn1$ git log --pretty --numstat --summary | ~/src/git2cl/git2cl > ChangeLog
+jas@mocca:~/src/libtasn1$
+...........................................................................
+
+The output format is specified by:
+
+link:http://www.gnu.org/prep/standards/html_node/Change-Logs.html[]
+
+In the future, git2cl may be modified to run this command itself,
+similar to how cvs2cl works.
+
+My inspiration for writing this tool was the
+link:http://www.red-bean.com/cvs2cl/[cvs2cl] tool, which I am using in
+several projects.  Replacing it is a necessary condition for me to
+seriously consider switching from CVS to GIT for my projects.
+
+Currently, git2cl lacks much of the flexibility in git2cl.  Sheesh,
+git2cl doesn't even have command line parameters!
+
+The canonical home page for git2cl is:
+link:http://josefsson.org/git2cl/[] and its repository can be found at
+link:http://repo.or.cz/w/git2cl.git[].
+
+Support
+-------
+
+Try talking to mailto:simon@josefsson.org[Simon Josefsson].
