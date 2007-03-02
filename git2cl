@@ -243,9 +243,9 @@ while (<>) {
 	}
 	$state = 1 if (m,^$,);
     } elsif ($state == 1) {
+	$state = 2 if (m,^$,);
 	s/^    //g;
 	$comment = $comment . $_;
-	$state = 2 if (m,^$,);
     } elsif ($state == 2) {
 	if (m,^([0-9]+)\t([0-9]+)\t(.*)$,) {
 	    push @files, $3;
