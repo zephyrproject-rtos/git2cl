@@ -250,7 +250,7 @@ while (<>) {
     } elsif ($state == 2) {
 	if (m,^([0-9]+)\t([0-9]+)\t(.*)$,) {
 	    push @files, $3;
-	} else {
+	} elsif (m,^[^ ],) {
 	    # No file changes.
 	    $done = 1;
 	}
