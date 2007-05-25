@@ -287,7 +287,9 @@ while (<>) {
     }
 }
 
-print (strftime "%Y-%m-%d  $author\n\n", @date);
-my $msg = wrap_log_entry($comment, "\t", 69, 69);
-$msg =~ s/[ \t]+\n/\n/g;
-print "\t* $msg\n";
+if (@files) {
+    print (strftime "%Y-%m-%d  $author\n\n", @date);
+    my $msg = wrap_log_entry($comment, "\t", 69, 69);
+    $msg =~ s/[ \t]+\n/\n/g;
+    print "\t* $msg\n";
+}
