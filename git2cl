@@ -227,6 +227,7 @@ my @date;
 my $author;
 my @files;
 my $comment;
+my $merge;
 
 my $state; # 0-header 1-comment 2-files
 my $done = 0;
@@ -234,6 +235,8 @@ my $done = 0;
 $state = 0;
 
 while (<>) {
+    #print STDERR "debug ($state, " . (@date ? (strftime "%Y-%m-%d", @date) : "") . "): `$_'\n";
+
     if ($state == 0) {
 	if (m,^Author: (.*),) {
 	    $author = $1;
@@ -241,14 +244,19 @@ while (<>) {
 	if (m,^Date: (.*),) {
 	    @date = strptime($1);
 	}
+	if (m,^Merge: (.*),) {
+	    $merge = 1;
+	}
 	$state = 1 if (m,^$,);
     } elsif ($state == 1) {
 	$state = 2 if (m,^$,);
 	s/^    //g;
 	s/\n/ /g;
 	$comment = $comment . $_;
+    } elsif ($state == 2 && $merge) {
+	$done = 1;
     } elsif ($state == 2) {
-	if (m,^([0-9]+)\t([0-9]+)\t(.*)$,) {
+	if (m,^([-0-9]+)\t([-0-9]+)\t(.*)$,) {
 	    push @files, $3;
 	} elsif (m,^[^ ],) {
 	    # No file changes.
@@ -275,12 +283,17 @@ while (<>) {
 
 	$msg =~ s/[ \t]+\n/\n/g;
 
-	print "$files: $msg\n";
+	if ($merge) {
+	    print "\t$msg\n";
+	} else {
+	    print "$files: $msg\n";
+	}
 
 	@date = ();
 	$author = "";
 	@files = ();
 	$comment = "";
+	$merge = 0;
 
 	$state = 0;
 	$done = 0;
