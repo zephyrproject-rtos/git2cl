@@ -1,6 +1,15 @@
 #!/usr/bin/perl
 
-# Copyright (C) 2007 Simon Josefsson.
+# Copyright (C) 2007, 2008 Simon Josefsson.
+# Changes by Luis Mondesi <lemsx1@gmail.com>
+# * calls git directly. To use it just: 
+#   cd ~/Project/my_git_repo; git2cl > ChangeLog
+# * implements strptime()
+# * fixes bugs in $comment parsing
+#   - copy input before we remove leading spaces
+#   - skip "merge branch" statements as they don't
+#     have information about files (i.e. we never
+#     go into $state 2)
 #
 # The functions mywrap, last_line_len, wrap_log_entry are derived from
 # the cvs2cl tool, see <http://www.red-bean.com/cvs2cl/>:
@@ -23,11 +32,44 @@
 # 02111-1307, USA.
 
 use strict;
-use Date::Parse qw(strptime);
 use POSIX qw(strftime);
 use Text::Wrap qw(wrap);
 
 use constant EMPTY_LOG_MESSAGE => '*** empty log message ***';
+
+# this is a helper hash for stptime.
+# Assumes you are calling 'git log ...' with LC_ALL=C
+my %month = (
+    'Jan'=>0,
+    'Feb'=>1,
+    'Mar'=>2,
+    'Apr'=>3,
+    'May'=>4,
+    'Jun'=>5,
+    'Jul'=>6,
+    'Aug'=>7,
+    'Sep'=>8,
+    'Oct'=>9,
+    'Nov'=>10,
+    'Dec'=>11,
+);
+sub strptime {
+    my $str = shift;
+    return undef if not defined $str;
+
+    # we are parsing this format
+    # Fri Oct 26 00:42:56 2007 -0400
+    # to these fields
+    # sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1
+    # Luis Mondesi <lemsx1@gmail.com>
+    my @date;
+    if ($str =~ /([[:alpha:]]{3})\s+([[:alpha:]]{3})\s+([[:digit:]]{1,2})\s+([[:digit:]]{1,2}):([[:digit:]]{1,2}):([[:digit:]]{1,2})\s+([[:digit:]]{4})/){
+        push(@date,$6,$5,$4,$3,$month{$2},($7 - 1900),-1,-1,-1);
+    } else {
+        die ("Cannot parse date '$str'\n'");
+    }
+    return @date;
+}
 
 sub mywrap {
     my ($indent1, $indent2, @text) = @_;
@@ -227,47 +269,45 @@ my @date;
 my $author;
 my @files;
 my $comment;
-my $merge;
 
 my $state; # 0-header 1-comment 2-files
 my $done = 0;
 
 $state = 0;
 
-while (<>) {
+while (my $_l = <>) {
     #print STDERR "debug ($state, " . (@date ? (strftime "%Y-%m-%d", @date) : "") . "): `$_'\n";
-
     if ($state == 0) {
-	if (m,^Author: (.*),) {
+	if ($_l =~ m,^Author: (.*),) {
 	    $author = $1;
 	}
-	if (m,^Date: (.*),) {
+	if ($_l =~ m,^Date: (.*),) {
 	    @date = strptime($1);
 	}
-	if (m,^Merge: (.*),) {
-	    $merge = 1;
-	}
-	$state = 1 if (m,^$,);
+	$state = 1 if ($_l =~ m,^$, and $author and (@date+0>0));
     } elsif ($state == 1) {
-	$state = 2 if (m,^$,);
-	s/^    //g;
-	s/\n/ /g;
-	$comment = $comment . $_;
-    } elsif ($state == 2 && $merge) {
-	$done = 1;
+        # * modifying our input text is a bad choice
+        #   let's make a copy of it first, then we remove spaces 
+        # * if we meet a "merge branch" statement, we need to start
+        #   over and find a real entry
+        # Luis Mondesi <lemsx1@gmail.com>
+        my $_s = $_l;
+	$_s =~ s/^    //g;
+        if ($_s =~ m/^Merge branch/)
+        {
+            $state=0;
+            next;
+        }
+	$comment = $comment . $_s;
+	$state = 2 if ($_l =~ m,^$,);
     } elsif ($state == 2) {
-	if (m,^([-0-9]+)\t([-0-9]+)\t(.*)$,) {
+	if ($_l =~ m,^([0-9]+)\t([0-9]+)\t(.*)$,) {
 	    push @files, $3;
-	} elsif (m,^[^ ],) {
-	    # No file changes.
-	    $done = 1;
 	}
-	$done = 1 if (m,^$,);
+	$done = 1 if ($_l =~ m,^$,);
     }
 
-    if ($done && @date == ()) {
-	print STDERR "warning: could not parse entry\n";
-    } elsif ($done) {
+    if ($done) {
 	print (strftime "%Y-%m-%d  $author\n\n", @date);
 
 	my $files = join (", ", @files);
@@ -283,24 +323,20 @@ while (<>) {
 
 	$msg =~ s/[ \t]+\n/\n/g;
 
-	if ($merge) {
-	    print "\t$msg\n";
-	} else {
-	    print "$files: $msg\n";
-	}
+	print "$files: $msg\n";
 
 	@date = ();
 	$author = "";
 	@files = ();
 	$comment = "";
-	$merge = 0;
 
 	$state = 0;
 	$done = 0;
     }
 }
 
-if (@files) {
+if (@date + 0)
+{
     print (strftime "%Y-%m-%d  $author\n\n", @date);
     my $msg = wrap_log_entry($comment, "\t", 69, 69);
     $msg =~ s/[ \t]+\n/\n/g;
