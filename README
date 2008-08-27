@@ -13,7 +13,7 @@ jas@mocca:~/src/libtasn1$
 ...........................................................................
 
 If you don't want git2cl to invoke git log internally, you can use it
-as a pipe.  It needs the git log generated with --pretty --numstat and
+as a pipe.  It needs a git log generated with --pretty --numstat and
 --summary.  You can use it as follows:
 
 ...........................................................................
@@ -26,9 +26,9 @@ The output format is specified by:
 link:http://www.gnu.org/prep/standards/html_node/Change-Logs.html[]
 
 My inspiration for writing this tool was the
-link:http://www.red-bean.com/cvs2cl/[cvs2cl] tool, which I am using in
-several projects.  Replacing it is a necessary condition for me to
-seriously consider switching from CVS to GIT for my projects.
+link:http://www.red-bean.com/cvs2cl/[cvs2cl] tool, which I have been
+using in several projects.  Replacing it was necessary to seriously
+consider switching from CVS to GIT for my projects.
 
 The canonical home page for git2cl is:
 link:http://josefsson.org/git2cl/[] and its repository can be found at
