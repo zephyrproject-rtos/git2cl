@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-# Copyright (C) 2007, 2008 Simon Josefsson.
-# Changes by Luis Mondesi <lemsx1@gmail.com>
+# Copyright (C) 2007, 2008 Simon Josefsson <simon@josefsson.org>
+# Copyright (C) 2007 Luis Mondesi <lemsx1@gmail.com>
 # * calls git directly. To use it just: 
 #   cd ~/Project/my_git_repo; git2cl > ChangeLog
 # * implements strptime()
