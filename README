@@ -30,9 +30,6 @@ link:http://www.red-bean.com/cvs2cl/[cvs2cl] tool, which I am using in
 several projects.  Replacing it is a necessary condition for me to
 seriously consider switching from CVS to GIT for my projects.
 
-Currently, git2cl lacks much of the flexibility in git2cl.  Sheesh,
-git2cl doesn't even have command line parameters!
-
 The canonical home page for git2cl is:
 link:http://josefsson.org/git2cl/[] and its repository can be found at
 link:http://repo.or.cz/w/git2cl.git[].
